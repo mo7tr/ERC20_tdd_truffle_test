@@ -16,6 +16,7 @@ contract("ERC20", function (accounts) {
   console.log("owner =>", owner);
 
   const recipient = accounts[1];
+  const spender = accounts[2];
 
   beforeEach(async function () {
     this.ERC20Instance = await ERC20.new(_initialsupply, { from: owner });
@@ -44,17 +45,9 @@ contract("ERC20", function (accounts) {
 
   it("vérifie si un transfer est bien effectué", async function () {
     let balanceOwnerBeforeTransfer = await this.ERC20Instance.balanceOf(owner);
-    console.log(
-      "balanceOwnerBeforeTransfer =>",
-      balanceOwnerBeforeTransfer.toString()
-    );
 
     let balanceRecipientBeforeTransfer = await this.ERC20Instance.balanceOf(
       recipient
-    );
-    console.log(
-      "balanceRecipientBeforeTransfer =>",
-      balanceRecipientBeforeTransfer.toString()
     );
 
     let amount = new BN(10);
@@ -62,16 +55,101 @@ contract("ERC20", function (accounts) {
     await this.ERC20Instance.transfer(recipient, amount, { from: owner });
 
     let balanceOwnerAfterTransfer = await this.ERC20Instance.balanceOf(owner);
-    console.log(
-      "balanceOwnerAfterTransfer =>",
-      balanceOwnerAfterTransfer.toString()
-    );
 
     let balanceRecipientAfterTransfer = await this.ERC20Instance.balanceOf(
       recipient
     );
+
     console.log(
-      "balanceRecipientAfterTransfer =>",
+      "balance Owner Before Transfer =>",
+      balanceOwnerBeforeTransfer.toString()
+    );
+
+    console.log(
+      "balance Recipient Before Transfer =>",
+      balanceRecipientBeforeTransfer.toString()
+    );
+
+    console.log(
+      "balance Owner After Transfer =>",
+      balanceOwnerAfterTransfer.toString()
+    );
+
+    console.log(
+      "balance Recipient After Transfer =>",
+      balanceRecipientAfterTransfer.toString()
+    );
+
+    expect(balanceOwnerAfterTransfer).to.be.bignumber.equal(
+      balanceOwnerBeforeTransfer.sub(amount)
+    );
+    expect(balanceRecipientAfterTransfer).to.be.bignumber.equal(
+      balanceRecipientBeforeTransfer.add(amount)
+    );
+  });
+
+  it("vérifie si l'approve est bien effectué", async function () {
+    let allowanceSpenderBeforeApprove = await this.ERC20Instance.allowance(
+      owner,
+      spender
+    );
+
+    let amount = new BN(100);
+    await this.ERC20Instance.approve(spender, amount, {
+      from: owner,
+    });
+
+    let allowanceSpenderAfterApprove = await this.ERC20Instance.allowance(
+      owner,
+      spender
+    );
+
+    console.log(
+      "allowance Spender Before Approve =>",
+      allowanceSpenderBeforeApprove.toString()
+    );
+    console.log(
+      "allowance Spender After Approve =>",
+      allowanceSpenderAfterApprove.toString()
+    );
+
+    expect(allowanceSpenderAfterApprove).to.be.bignumber.equal(
+      allowanceSpenderBeforeApprove.add(amount)
+    );
+  });
+
+  it("vérifie si transferFrom est ok après approve", async function () {
+    let balanceOwnerBeforeTransfer = await this.ERC20Instance.balanceOf(owner);
+    let balanceRecipientBeforeTransfer = await this.ERC20Instance.balanceOf(
+      recipient
+    );
+    let amount = new BN(10);
+
+    await this.ERC20Instance.approve(spender, amount, { from: owner });
+    await this.ERC20Instance.transferFrom(owner, recipient, amount, {
+      from: spender,
+    });
+
+    let balanceOwnerAfterTransfer = await this.ERC20Instance.balanceOf(owner);
+    let balanceRecipientAfterTransfer = await this.ERC20Instance.balanceOf(
+      recipient
+    );
+
+    console.log(
+      "balance Owner Before Transfer =>",
+      balanceOwnerBeforeTransfer.toString()
+    );
+    console.log(
+      "balance recipient Before Transfer =>",
+      balanceRecipientBeforeTransfer.toString()
+    );
+
+    console.log(
+      "balance Owner After Transfer =>",
+      balanceOwnerAfterTransfer.toString()
+    );
+    console.log(
+      "balance Recipient Before Transfer =>",
       balanceRecipientAfterTransfer.toString()
     );
 

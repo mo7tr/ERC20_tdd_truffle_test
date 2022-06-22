@@ -12,5 +12,5 @@ module.exports = async function (deployer, network, accounts) {
   var instance = await ERC20Token.deployed();
   var balanceOfOwner = await instance.balanceOf(accounts[0]);
 
-  console.log("balanceOfOwner =>", balanceOfOwner.toString());
+  console.log("balance Of Owner =>", balanceOfOwner.toString());
 };
